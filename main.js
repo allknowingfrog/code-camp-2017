@@ -143,8 +143,15 @@ function gameLoop() {
 
     if(enemies.length < 10 && spawnTimer <= 0) {
         var enemy = new Entity(0, 0, 'green');
-        enemy.setMidX(canvas.width / 2);
-        enemy.setMidY(canvas.height / 2);
+        do {
+            enemy.x = Math.floor(Math.random() * canvas.width - SIZE);
+            enemy.y = Math.floor(Math.random() * canvas.height - SIZE);
+        } while(
+            Math.abs(player.x - enemy.x) < SIZE * 4 ||
+            Math.abs(player.y - enemy.y) < SIZE * 4
+        );
+        //enemy.setMidX(canvas.width / 2);
+        //enemy.setMidY(canvas.height / 2);
         enemies.push(enemy);
         spawnTimer = SPAWN;
     } else if(spawnTimer > 0) {
