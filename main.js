@@ -244,7 +244,13 @@ function gameLoop() {
     context.fillStyle = 'white';
     context.fillText(score, canvas.width - 50, 40);
 
-    if(playing) window.requestAnimationFrame(gameLoop);
+    if(playing) {
+        window.requestAnimationFrame(gameLoop);
+    } else {
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillText('SPACE to start', canvas.width / 2, canvas.height / 2);
+    }
 }
 
 function keyDown(e) {
