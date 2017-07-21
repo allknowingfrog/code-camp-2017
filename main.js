@@ -23,27 +23,28 @@ var ACC = 1000; //acceleration per second
 var DCC = 2;
 var COOL = .5;
 var SPAWN = 2;
+var ENEMY_RAND = .33;
 var coolTimer = 0;
 var spawnTimer = 0;
 var score = 0;
 var map =
   "   X                          "
++ "   X          X               "
 + "   X                          "
-+ "   X                          "
-+ " XXX                          "
++ " XXX          X           X   "
 + "                              "
-+ "     xxxxxx                   "
-+ "          x                   "
-+ "     x    x                   "
-+ "     x    x                   "
-+ "     x                        "
-+ "     xxxxxx                   "
-+ "                              "
-+ "                              "
-+ "                              "
++ "     xxxxxx   X  X  X         "
++ "          x   X     X         "
++ "          x   X     X         "
++ "     x    x   X  X  X         "
++ "     x        X  X  X         "
++ "     xxxxx    X     X         "
++ "              X     X         "
++ "              X  X  X         "
 + "                              "
 + "                              "
 + "                              "
++ "  XXXXXXXXXXXXXXXXXXXXXXXXX   "
 + "                              "
 + "                              "
 + "                              "
@@ -137,6 +138,8 @@ function gameLoop() {
         enemy = enemies[i];
         dx = player.x - enemy.x;
         dy = player.y - enemy.y;
+        if(ENEMY_RAND > Math.random()) dx *= -1;
+        if(ENEMY_RAND > Math.random()) dy *= -1;
         total = Math.abs(dx) + Math.abs(dy);
         enemy.vx += (dx / total) * ACC * delta;
         enemy.vy += (dy / total) * ACC * delta;
