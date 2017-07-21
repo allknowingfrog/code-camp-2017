@@ -2,6 +2,7 @@ var canvas;
 var context;
 var player;
 var zombieSprites = new Image();
+var wallSprite = new Image();
 var enemies = [];
 var bullets = [];
 var walls = [];
@@ -24,9 +25,11 @@ var DCC = 2;
 var COOL = .5;
 var SPAWN = 2;
 var ENEMY_RAND = .33;
+var DELTA_MAX = .1;
 var coolTimer = 0;
 var spawnTimer = 0;
 var score = 0;
+var playing;
 var map =
   "   X                          "
 + "   X          X               "
@@ -58,6 +61,7 @@ function init() {
     context = canvas.getContext('2d');
 
     zombieSprites.src = 'zombies.png';
+    wallSprite.src = 'wall.png';
 
     document.addEventListener('keydown', keyDown, false);
     document.addEventListener('keyup', keyUp, false);
@@ -66,6 +70,18 @@ function init() {
     document.addEventListener('mousemove', mouseMove, false);
 
     player = new Entity(0, 0, 'red');
+
+    reset();
+}
+
+function reset() {
+    playing = true;
+
+    enemies = [];
+    bullets = [];
+    player.x = 0;
+    player.y = 0;
+    score = 0;
 
     for(var x=0; x<XSIZE; x++) {
         walls[x] = [];
@@ -87,6 +103,8 @@ function gameLoop() {
     var now = Date.now();
     var delta = (now - timestamp) / 1000;
     timestamp = now;
+
+    if(delta > DELTA_MAX) delta = DELTA_MAX;
 
     if(inputs.left) {
         player.vx -= ACC * delta;
@@ -139,7 +157,7 @@ function gameLoop() {
         dx = player.x - enemy.x;
         dy = player.y - enemy.y;
         if(ENEMY_RAND > Math.random()) dx *= -1;
-        if(ENEMY_RAND > Math.random()) dy *= -1;
+        else if(ENEMY_RAND > Math.random()) dy *= -1;
         total = Math.abs(dx) + Math.abs(dy);
         enemy.vx += (dx / total) * ACC * delta;
         enemy.vy += (dy / total) * ACC * delta;
@@ -173,7 +191,8 @@ function gameLoop() {
     for(var i=0; i<enemies.length; i++) {
         enemy = enemies[i];
         if(collides(player, enemy)) {
-            shove(player, enemy);
+            //shove(player, enemy);
+            playing = false;
         }
     }
 
@@ -212,7 +231,11 @@ function gameLoop() {
     for(var x=0; x<XSIZE; x++) {
         for(var y=0; y<YSIZE; y++) {
             if(walls[x][y]) {
-                walls[x][y].draw();
+                context.drawImage(
+                    wallSprite,
+                    walls[x][y].x, walls[x][y].y,
+                    walls[x][y].size, walls[x][y].size
+                );
             }
         }
     }
@@ -221,7 +244,7 @@ function gameLoop() {
     context.fillStyle = 'white';
     context.fillText(score, canvas.width - 50, 40);
 
-    window.requestAnimationFrame(gameLoop);
+    if(playing) window.requestAnimationFrame(gameLoop);
 }
 
 function keyDown(e) {
@@ -243,6 +266,9 @@ function keyDown(e) {
         case 40:
         case 83:
             inputs.down = true;
+            break;
+        case 32:
+            if(!playing) reset();
             break;
     }
 }
