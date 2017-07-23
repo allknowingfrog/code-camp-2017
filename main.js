@@ -141,8 +141,9 @@ function gameLoop() {
 
     player.update(delta);
 
-    if(enemies.length < 10 && spawnTimer <= 0) {
+    if(enemies.length < 1 && spawnTimer <= 0) {
         var enemy = new Entity(0, 0, 'green');
+        /*
         do {
             enemy.x = Math.floor(Math.random() * canvas.width - SIZE);
             enemy.y = Math.floor(Math.random() * canvas.height - SIZE);
@@ -150,8 +151,9 @@ function gameLoop() {
             Math.abs(player.x - enemy.x) < SIZE * 4 ||
             Math.abs(player.y - enemy.y) < SIZE * 4
         );
-        //enemy.setMidX(canvas.width / 2);
-        //enemy.setMidY(canvas.height / 2);
+        */
+        enemy.setMidX(canvas.width / 2);
+        enemy.setMidY(canvas.height / 2);
         enemies.push(enemy);
         spawnTimer = SPAWN;
     } else if(spawnTimer > 0) {
@@ -175,7 +177,7 @@ function gameLoop() {
         for(var n=0; n<enemies.length; n++) {
             if(i == n) continue;
             if(collides(enemies[i], enemies[n])) {
-                shove(enemies[i], enemies[n]);
+                resolve(enemies[i], enemies[n]);
             }
         }
     }
@@ -198,8 +200,8 @@ function gameLoop() {
     for(var i=0; i<enemies.length; i++) {
         enemy = enemies[i];
         if(collides(player, enemy)) {
-            //shove(player, enemy);
-            playing = false;
+            resolve(player, enemy);
+            //playing = false;
         }
     }
 
@@ -381,4 +383,63 @@ function shove(a, b, wall) {
             b.setBottom(a.getTop());
         }
     }
+}
+
+function resolve(a, b) {
+    var vx = b.vx - a.vx;
+    var vy = b.vy - a.vy;
+
+    if(!vx && !vy) return;
+
+    var dx = b.x - a.x;
+    var dy = b.y - a.y;
+
+    console.log('>>>'); 
+    console.log('vx: ' + vx + ', vy: ' + vy + ', dx: ' + dx + ', dy: ' + dy); 
+
+    var dist = a.size / 2 + b.size / 2; 
+
+    if(vx > 0 && dx > 0) {
+        dx = -dx - dist;
+        console.log('here');
+    } else if(vx < 0 && dx < 0) {
+        dx = -dx + dist;
+        console.log('here');
+    }
+
+    if(vy > 0 && dy > 0) {
+        dy = -dy - dist;
+        console.log('here');
+    } else if(vy < 0 && dy < 0) {
+        dy = -dy + dist;
+        console.log('here');
+    }
+
+    //console.log('vx: ' + vx + ', vy: ' + vy + ', dx: ' + dx + ', dy: ' + dy); 
+
+    var dx_delta;
+    var dy_delta;
+    var delta;
+
+    if(vx) dx_delta = dx / vx;
+    if(vy) dy_delta = dy / vy;
+    if(!vy || dx_delta > dy_delta) {
+        delta = dx_delta / 2;
+        if(delta < -DELTA_MAX) delta = -DELTA_MAX;
+        a.update(delta);
+        b.update(delta);
+        //a.vx *= -1;
+        //b.vx *= -1;
+    } else {
+        delta = dy_delta / 2;
+        if(delta < -DELTA_MAX) delta = -DELTA_MAX;
+        a.update(delta);
+        b.update(delta);
+        //a.vy *= -1;
+        //b.vy *= -1;
+    }
+    console.log(delta);
+    if(isNaN(delta)) playing = false;
+    //a.update(-delta);
+    //b.update(-delta);
 }
